@@ -5,16 +5,24 @@ import ImageHoster.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.regex.*;
+
 @Service
 public class UserService {
 
     @Autowired
     private UserRepository userRepository;
 
-    //Call the registerUser() method in the UserRepository class to persist the user record in the database
+    private Pattern pattern;
+
+    private Matcher matcher;
+
     public void registerUser(User newUser) {
         userRepository.registerUser(newUser);
     }
+    private static final String PASSWORD_PATTERN =
+            "(?=(.*[a-z]){1,})(?=(.*[A-Z]){1,})(?=(.*[\\d]){1,})(?=(.*[\\W]){1,})(?!.*\\s).{4,}";
+
 
     //Since we did not have any user in the database, therefore the user with username 'upgrad' and password 'password' was hard-coded
     //This method returned true if the username was 'upgrad' and password is 'password'
@@ -32,4 +40,9 @@ public class UserService {
         }
     }
 
+    public boolean validatePassword(String passwordToBeValidated) {
+        pattern = Pattern.compile(PASSWORD_PATTERN);
+        matcher = pattern.matcher(passwordToBeValidated);
+        return matcher.matches();
+    }
 }
