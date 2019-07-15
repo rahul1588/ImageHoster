@@ -24,6 +24,8 @@ public class UserController {
     @Autowired
     private ImageService imageService;
 
+    private boolean isInvalidPwd = false;
+
     //This controller method is called when the request pattern is of type 'users/registration'
     //This method declares User type and UserProfile type object
     //Sets the user profile with UserProfile type object
@@ -34,6 +36,13 @@ public class UserController {
         UserProfile profile = new UserProfile();
         user.setProfile(profile);
         model.addAttribute("User", user);
+
+        if(isInvalidPwd){
+            String error = "Password must contain atleast 1 alphabet, 1 number & 1 special character";
+            model.addAttribute("passwordTypeError", error);
+            isInvalidPwd = false;
+        }
+
         return "users/registration";
     }
 
@@ -41,8 +50,13 @@ public class UserController {
     //This method calls the business logic and after the user record is persisted in the database, directs to login page
     @RequestMapping(value = "users/registration", method = RequestMethod.POST)
     public String registerUser(User user) {
-        userService.registerUser(user);
-        return "redirect:/users/login";
+        if (userService.validatePassword(user.getPassword())) {
+            userService.registerUser(user);
+            return "redirect:/users/login";
+        } else {
+            isInvalidPwd = true;
+            return "redirect:/users/registration";
+        }
     }
 
     //This controller method is called when the request pattern is of type 'users/login'
